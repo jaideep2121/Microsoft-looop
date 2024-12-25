@@ -1,14 +1,31 @@
 "use client"
+import { db } from '@/config/firebaseConfig';
+import { collection, onSnapshot, query, where } from 'firebase/firestore';
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
-import React from 'react'
+import React, { useState } from 'react'
 
 function WorkspaceItemList({workspaceList}) {
 
+    const[documentList,setDocumentList]=useState([]);
   
   const router=useRouter();
   const OnClickWorkspaceItem=(workspaceId)=>{
-      router.push('/workspace/'+workspaceId)
+     
+            const q=query(collection(db,'workspaceDocuments'),
+        where('workspaceId','==',Number(workspaceId)));
+        const unsubscribe=onSnapshot(q,(querySnapshot)=>{
+            setDocumentList([]);
+    
+            querySnapshot.forEach((doc)=>{
+                setDocumentList(documentList=>[...documentList,doc.data()])
+            })
+        });
+      
+     
+    
+        
+      router.push('/workspace/'+workspaceId+'/'+documentList[0].id);
   }
 
   return (
